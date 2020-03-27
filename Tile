@@ -1,0 +1,143 @@
+
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
+
+public class Tile extends StackPane {
+    private final double TILE_WIDTH, TILE_HEIGHT;
+    private GameBoard gameBoard;
+    private boolean isShark;
+    private boolean isRevealed = false;
+
+
+
+
+    // Just for a demo
+    private Label label;
+
+
+    Tile(double tileWidth, double tileHeight, GameBoard gameBoard) {
+        TILE_WIDTH = tileWidth;
+        TILE_HEIGHT = tileHeight;
+        this.gameBoard = gameBoard;
+
+        setUpBoarder();
+        setUpBackground();
+
+        if ((int) (Math.random() * 10) < 1) {
+            isShark = true;
+        } else {
+            isShark = false;
+        }
+
+        label = new Label("");
+        getChildren().addAll(label);
+
+        // Just a demo to play with for now.
+        setOnMouseClicked(event -> {
+            this.newSetUpBackground();
+            isRevealed = true;
+                revealAll();
+
+        });
+    }
+    public void revealAll(){
+                if (isShark) {
+                label.setText("O");
+                label.setTextFill(Color.RED);
+                System.exit(0);
+                this.newSetUpBackground();
+            } else
+
+                label.setText(Integer.toString(countSharks()));
+                this.newSetUpBackground();
+                this.floodFill();
+        }
+
+        public void floodFill() {
+            Tile[][] board = gameBoard.getBoard();
+            int row = (int) (getTranslateY() / TILE_HEIGHT);
+            int col = (int) (getTranslateX() / TILE_WIDTH);
+
+            int count = 0;
+            for (int r = -1; r <= 1; r++) {
+                for (int c = -1; c <= 1; c++) {
+                    // Don't count if position is not inbounds
+                    if (!(row + r >= 0 && row + r < board.length && col + c >= 0 && col + c < board[row + r].length))
+                        continue;
+                    Tile neighbor = board[row + r][col+c];
+                        if (!neighbor.getShark() && !neighbor.getRevealed()){
+                            neighbor.revealAll();
+
+                        }
+                }
+
+            }
+        }
+
+        public boolean getRevealed() {
+            return isRevealed;
+        }
+
+    public int countSharks(){
+        Tile[][] board = gameBoard.getBoard();
+        int row = (int) (getTranslateY() / TILE_HEIGHT);
+        int col = (int) (getTranslateX() / TILE_WIDTH);
+
+        int count = 0;
+        for (int r = -1; r <= 1; r++) {
+            for (int c = -1; c <= 1; c++) {
+                // Don't count if position is not inbounds
+                if (!(row + r >= 0 && row + r < board.length && col + c >= 0 && col + c < board[row + r].length))
+                    continue;
+
+                else if (board[row + r][col + c].getShark()) {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+
+
+
+
+
+
+    public boolean getShark(){
+        return isShark;
+    }
+
+
+    public void setUpBackground() {
+        BackgroundFill background_fill = new BackgroundFill(Color.WHITE,
+                CornerRadii.EMPTY, Insets.EMPTY);
+        Background background = new Background(background_fill);
+        setBackground(background);
+    }
+
+    public void newSetUpBackground() {
+        BackgroundFill background_fill = new BackgroundFill(Color.GREY,
+                CornerRadii.EMPTY, Insets.EMPTY);
+        Background background = new Background(background_fill);
+        setBackground(background);
+    }
+
+    // Creates a black boarder around each tile
+    private void setUpBoarder() {
+        Rectangle boarder = new Rectangle(getTranslateX(),
+                getTranslateY(),
+                TILE_WIDTH,
+                TILE_WIDTH);
+        boarder.setFill(null);
+        boarder.setStroke(Color.BLACK);
+        getChildren().addAll(boarder);
+    }
+}
