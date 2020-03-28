@@ -40,7 +40,7 @@ public class Tile extends StackPane {
         label = new Label("");
         getChildren().addAll(label);
 
-        // Just a demo to play with for now.
+
         setOnMouseClicked(event -> {
             this.newSetUpBackground();
             isRevealed = true;
@@ -48,18 +48,22 @@ public class Tile extends StackPane {
 
         });
     }
-    public void revealAll(){
-                if (isShark) {
-                label.setText("O");
-                label.setTextFill(Color.RED);
-                System.exit(0);
-                this.newSetUpBackground();
-            } else
 
-                label.setText(Integer.toString(countSharks()));
-                this.newSetUpBackground();
-                this.floodFill();
+    public void revealAll() {
+        if (isShark) {
+            label.setText("O");
+            label.setTextFill(Color.RED);
+            System.exit(0);
+            this.newSetUpBackground();
+        } else if (this.countSharks() == 0) {
+            this.newSetUpBackground();
+            floodFill();
+        } else {
+            label.setText(Integer.toString(countSharks()));
+            this.newSetUpBackground();
+            floodFill();
         }
+    }
 
         public void floodFill() {
             Tile[][] board = gameBoard.getBoard();
@@ -73,9 +77,8 @@ public class Tile extends StackPane {
                     if (!(row + r >= 0 && row + r < board.length && col + c >= 0 && col + c < board[row + r].length))
                         continue;
                     Tile neighbor = board[row + r][col+c];
-                        if (!neighbor.getShark() && !neighbor.getRevealed()){
+                        if (!neighbor.getShark() && !neighbor.getRevealed() && countSharks() == 0){
                             neighbor.revealAll();
-
                         }
                 }
 
